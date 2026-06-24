@@ -1,10 +1,7 @@
 package com.voter.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.voter.enums.RespCode;
 
-@Getter
-@Setter
 public class RespBody<T> {
 
     /**
@@ -19,6 +16,49 @@ public class RespBody<T> {
      * 自定义返回 数据结果集
      */
     private T data;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public RespBody() {
+
+    }
+
+    public RespBody(String code) {
+        this.code = code;
+    }
+
+    public RespBody(String code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public RespBody(String code, String msg, T data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+    }
 
     public static RespBody<Void> ok() {
         return ok(null);
