@@ -54,6 +54,24 @@ public class CandidateService {
     }
 
     /**
+     * 根据ID查询单个候选人信息（包含全部图片）
+     *
+     * @param id 候选人ID
+     * @return 候选人详情，如果不存在则返回null
+     */
+    public CandidateResponseDTO getCandidateById(Long id) {
+        Candidates candidate = candidatesMapper.selectById(id);
+        if (candidate == null) {
+            return null;
+        }
+
+        CandidateResponseDTO dto = CandidateResponseDTO.fromEntity(candidate);
+        // 查询该候选人的全部图片
+        dto.setPhotos(getAllCandidatePhotos(candidate.getId()));
+        return dto;
+    }
+
+    /**
      * 获取候选人的最新20张图片（按创建时间倒序）
      *
      * @param candidateId 候选人ID
@@ -65,6 +83,19 @@ public class CandidateService {
                 .orderByDesc("create_time")
                 .last("LIMIT 20");
 
+        return candidatePhotosMapper.selectList(queryWrapper);
+    }
+
+    /**
+     * 获取候选人的全部图片（按创建时间倒序）
+     *
+     * @param candidateId 候选人ID
+     * @return 图片列表
+     */
+    private List<CandidatePhotos> getAllCandidatePhotos(Long candidateId) {
+        QueryWrapper<CandidatePhotos> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("candidate_id", candidateId)
+                .orderByDesc("create_time");
         return candidatePhotosMapper.selectList(queryWrapper);
     }
 }

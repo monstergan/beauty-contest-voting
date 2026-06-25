@@ -6,9 +6,7 @@ import com.voter.dto.PageRequestDTO;
 import com.voter.dto.RespBody;
 import com.voter.service.CandidateService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 候选人控制器
@@ -35,5 +33,20 @@ public class CandidateController {
         Page<CandidateResponseDTO> page = candidateService.getCandidateList(dto.getPageNum(), dto.getPageSize());
 
         return RespBody.ok(page);
+    }
+
+    /**
+     * 根据ID查询单个候选人信息
+     *
+     * @param id 候选人ID
+     * @return 候选人详情
+     */
+    @GetMapping("/getById")
+    public RespBody<CandidateResponseDTO> getCandidateById(@RequestParam("id") Long id) {
+        CandidateResponseDTO candidate = candidateService.getCandidateById(id);
+        if (candidate == null) {
+            return RespBody.fail("候选人不存在");
+        }
+        return RespBody.ok(candidate);
     }
 }
