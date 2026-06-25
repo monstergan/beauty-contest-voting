@@ -4,13 +4,10 @@ import com.voter.dto.LoginDTO;
 import com.voter.dto.LoginResponseDTO;
 import com.voter.dto.RegisterUserDTO;
 import com.voter.dto.RespBody;
-import com.voter.entity.VotingUser;
 import com.voter.service.VoterService;
+import com.voter.auth.AuthUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -43,5 +40,17 @@ public class VoterController {
     public RespBody<LoginResponseDTO> login(@RequestBody @Valid LoginDTO dto) {
         LoginResponseDTO response = voterService.login(dto);
         return RespBody.ok(response);
+    }
+
+    /**
+     * 用户登出
+     *
+     * @return 登出结果
+     */
+    @PostMapping("/logout")
+    public RespBody<String> logout() {
+        String token = AuthUtil.getTokenFromRequest();
+        voterService.logout(token);
+        return RespBody.ok("登出成功");
     }
 }

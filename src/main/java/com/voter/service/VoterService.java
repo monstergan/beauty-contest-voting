@@ -1,5 +1,6 @@
 package com.voter.service;
 
+import com.voter.auth.TokenBlacklistService;
 import com.voter.dto.LoginDTO;
 import com.voter.dto.LoginResponseDTO;
 import com.voter.dto.RegisterUserDTO;
@@ -8,6 +9,7 @@ import com.voter.exception.BusinessException;
 import com.voter.mapper.VotingUserMapper;
 import com.voter.utils.DigestUtil;
 import com.voter.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -17,6 +19,7 @@ import org.springframework.util.ObjectUtils;
 public class VoterService {
 
     private final VotingUserMapper votingUserMapper;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public boolean register(RegisterUserDTO dto) {
         checkUser(dto, votingUserMapper);
@@ -59,6 +62,23 @@ public class VoterService {
                 .build();
     }
 
+    public void logout(String token) {
+        if (ObjectUtils.isEmpty(token)) {
+            throw new BusinessException("未提供认证信息");
+        }
+
+        try {
+            // 解析token获取过期时间
+            Claims claims = JwtUtil.parseToken(token);
+            Long expireTime = claims.getExpiration().getTime();
+
+            // 将token加入黑名单
+            tokenBlacklistService.addToBlacklist(token, expireTime);
+        } catch (Exception e) {
+            throw new BusinessException("无效的认证信息");
+        }
+    }
+
     private static void checkUser(RegisterUserDTO dto, VotingUserMapper votingUserMapper) {
         if (ObjectUtils.isEmpty(dto.getUsername())) {
             throw new BusinessException("用户账户不能为空");
@@ -77,10 +97,8 @@ public class VoterService {
         }
 
         // 校验birthdayYear必须是4位整数
-        if (dto.getBirthdayYear() != null) {
-            if (dto.getBirthdayYear() < 1000 || dto.getBirthdayYear() > 9999) {
+        if (dto.getBirthdayYear() != null && (dto.getBirthdayYear() < 1000 || dto.getBirthdayYear() > 9999)) {
                 throw new BusinessException("出生年份必须是4位整数");
             }
-        }
     }
 }
