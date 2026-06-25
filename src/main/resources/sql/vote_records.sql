@@ -21,14 +21,17 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Table structure for vote_records
 -- ----------------------------
 DROP TABLE IF EXISTS `vote_records`;
-CREATE TABLE `vote_records` (
-  `id` bigint NOT NULL COMMENT '自增长主键',
-  `candidate_id` bigint NOT NULL COMMENT '候选人ID',
-  `voter_id` bigint NOT NULL COMMENT '用户ID',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  KEY `candidate_id_index` (`candidate_id`) USING BTREE COMMENT '候选人ID索引',
-  KEY `voter_id_index` (`voter_id`) USING BTREE COMMENT '用户ID'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='投票记录表';
+CREATE TABLE `vote_records`
+(
+    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '自增长主键',
+    `candidate_id` bigint   NOT NULL COMMENT '候选人ID',
+    `voter_id`     bigint   NOT NULL COMMENT '用户ID',
+    `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_voter_candidate` (`candidate_id`, `voter_id`) USING BTREE COMMENT '组合索引'
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='投票记录表';
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -331,54 +331,70 @@ spring:
 
 ### 3. 数据库表结构
 
-需要创建以下数据库表（示例）：
+SQL 文件位于 `src/main/resources/sql/` 目录下，创建数据库后依次执行以下文件：
+
+1. `voting_user.sql` - 用户表
+2. `candidates.sql` - 候选人表
+3. `candidate_photos.sql` - 候选人图片表
+4. `vote_records.sql` - 投票记录表
+
+**数据库表结构**：
 
 ```sql
--- 用户表
-CREATE TABLE voting_user (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_name VARCHAR(50) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  birthday_year INT NOT NULL,
-  phone VARCHAR(11),
-  is_voted BOOLEAN DEFAULT FALSE,
-  is_delete BOOLEAN DEFAULT FALSE,
-  create_user VARCHAR(50),
-  update_user VARCHAR(50),
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_user_name (user_name)
-);
+-- 1. 投票系统用户表
+DROP TABLE IF EXISTS `voting_user`;
+CREATE TABLE `voting_user` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增长主键',
+  `user_name` varchar(50) NOT NULL COMMENT '用户名',
+  `password` varchar(255) NOT NULL COMMENT '密码',
+  `birthday_year` smallint NOT NULL COMMENT '出生年',
+  `phone` varchar(20) DEFAULT NULL COMMENT '电话号码',
+  `is_voted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否已经投票',
+  `is_delete` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
+  `create_user` varchar(125) NOT NULL COMMENT '创建人信息',
+  `update_user` varchar(125) DEFAULT NULL COMMENT '更新人名称',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_name_index` (`user_name`) USING BTREE COMMENT '用户名唯一索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='投票系统用户表';
 
--- 候选人表
-CREATE TABLE candidates (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  candidate_name VARCHAR(50) NOT NULL,
-  age INT,
-  video_url VARCHAR(255),
-  introduction TEXT,
-  votes_number INT DEFAULT 0,
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- 2. 候选人信息表
+DROP TABLE IF EXISTS `candidates`;
+CREATE TABLE `candidates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长主键',
+  `candidate_name` varchar(125) NOT NULL COMMENT '候选人姓名',
+  `age` int DEFAULT NULL COMMENT '候选人年龄',
+  `video_url` varchar(500) NOT NULL COMMENT '候选人视频链接',
+  `introduction` varchar(1000) DEFAULT NULL COMMENT '候选人介绍',
+  `votes_number` int NOT NULL DEFAULT '0' COMMENT '投票数',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `candidate_name_index` (`candidate_name`) USING BTREE COMMENT '候选人唯一索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='候选人信息表';
 
--- 候选人图片表
-CREATE TABLE candidate_photos (
-  id BIGINT PRIMARY KEY,
-  candidate_id BIGINT NOT NULL,
-  image_url VARCHAR(255) NOT NULL,
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_candidate_id (candidate_id)
-);
+-- 3. 候选人图片表
+DROP TABLE IF EXISTS `candidate_photos`;
+CREATE TABLE `candidate_photos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长主键',
+  `candidate_id` bigint NOT NULL COMMENT '候选人ID',
+  `image_url` varchar(500) DEFAULT NULL COMMENT '图片链接',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `candidate_id_index` (`candidate_id`) USING BTREE COMMENT '候选人ID 索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='候选人图片表';
 
--- 投票记录表
-CREATE TABLE vote_records (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  voter_id BIGINT NOT NULL,
-  candidate_id BIGINT NOT NULL,
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_voter_candidate (voter_id, candidate_id)
-);
+-- 4. 投票记录表
+DROP TABLE IF EXISTS `vote_records`;
+CREATE TABLE `vote_records` (
+  `id` bigint NOT NULL COMMENT '自增长主键',
+  `candidate_id` bigint NOT NULL COMMENT '候选人ID',
+  `voter_id` bigint NOT NULL COMMENT '用户ID',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_voter_candidate` (`candidate_id`, `voter_id`) USING BTREE COMMENT '组合索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='投票记录表';
 ```
 
 ### 4. 编译运行

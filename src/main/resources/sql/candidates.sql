@@ -32,6 +32,6 @@ CREATE TABLE `candidates` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `candidate_name_index` (`candidate_name`) USING BTREE COMMENT '候选人唯一索引'
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='候选人信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='候选人信息表';
 
 SET FOREIGN_KEY_CHECKS = 1;
