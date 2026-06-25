@@ -1,5 +1,7 @@
 package com.voter.controller;
 
+import com.voter.dto.LoginDTO;
+import com.voter.dto.LoginResponseDTO;
 import com.voter.dto.RegisterUserDTO;
 import com.voter.dto.RespBody;
 import com.voter.entity.VotingUser;
@@ -29,5 +31,17 @@ public class VoterController {
     public RespBody<Boolean> register(@RequestBody @Valid RegisterUserDTO dto) {
         boolean isSuccess = voterService.register(dto);
         return RespBody.ok(isSuccess);
+    }
+
+    /**
+     * 用户登录
+     *
+     * @param dto 登录参数
+     * @return 登录结果（包含token信息）
+     */
+    @PostMapping("/login")
+    public RespBody<LoginResponseDTO> login(@RequestBody @Valid LoginDTO dto) {
+        LoginResponseDTO response = voterService.login(dto);
+        return RespBody.ok(response);
     }
 }

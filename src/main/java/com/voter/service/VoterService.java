@@ -1,9 +1,13 @@
 package com.voter.service;
 
+import com.voter.dto.LoginDTO;
+import com.voter.dto.LoginResponseDTO;
 import com.voter.dto.RegisterUserDTO;
 import com.voter.entity.VotingUser;
 import com.voter.exception.BusinessException;
 import com.voter.mapper.VotingUserMapper;
+import com.voter.utils.DigestUtil;
+import com.voter.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -19,6 +23,40 @@ public class VoterService {
         VotingUser user = dto.getVotingUser();
         int result = votingUserMapper.insert(user);
         return result > 0;
+    }
+
+    public LoginResponseDTO login(LoginDTO dto) {
+        if (ObjectUtils.isEmpty(dto.getUsername())) {
+            throw new BusinessException("用户名不能为空");
+        }
+        if (ObjectUtils.isEmpty(dto.getPassword())) {
+            throw new BusinessException("密码不能为空");
+        }
+
+        VotingUser user = votingUserMapper.selectByName(dto.getUsername());
+        if (ObjectUtils.isEmpty(user)) {
+            throw new BusinessException("用户不存在");
+        }
+
+        String encryptedPassword = DigestUtil.encrypt(dto.getPassword());
+        if (!encryptedPassword.equals(user.getPassword())) {
+            throw new BusinessException("密码错误");
+        }
+
+        // 生成token
+        String accessToken = JwtUtil.generateAccessToken(user.getId(), user.getUserName());
+        String refreshToken = JwtUtil.generateRefreshToken(user.getId(), user.getUserName());
+        Long expiresIn = JwtUtil.getAccessTokenExpireTime();
+
+        // 清空密码字段，不返回给前端
+        user.setPassword(null);
+
+        return LoginResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(expiresIn)
+                .userInfo(user)
+                .build();
     }
 
     private static void checkUser(RegisterUserDTO dto, VotingUserMapper votingUserMapper) {
