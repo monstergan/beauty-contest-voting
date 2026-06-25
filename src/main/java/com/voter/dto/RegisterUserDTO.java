@@ -37,6 +37,8 @@ public class RegisterUserDTO {
         user.setBirthdayYear(birthdayYear);
         user.setPhone(phone);
         user.setIsDelete(false);
+        user.setCreateUser("system");
+        user.setUpdateUser("system");
         return user;
     }
 }
